@@ -21,6 +21,7 @@ const view = ref(session.value ? (initialRoute.view === 'home' ? 'dashboard' : i
 const classes = ref([])
 const catalog = ref([])
 const selected = ref(null)
+const classActionLoading = ref(false)
 const loading = ref(false)
 const error = ref('')
 const notice = ref('')
@@ -105,6 +106,58 @@ async function showClass(classroomId, recordHistory = true) {
 
 function openClass(item) { return showClass(item.codigo) }
 
+async function refreshClass() {
+  if (selected.value?.codigo) await showClass(selected.value.codigo, false)
+}
+
+async function classAction(path, options, success) {
+  classActionLoading.value = true
+  error.value = ''
+  notice.value = ''
+  try {
+    await call(path, options)
+    await refreshClass()
+    if (success) notice.value = success
+  } catch (cause) { handleError(cause) }
+  finally { classActionLoading.value = false }
+}
+
+async function addMaterial(form) {
+  await classAction('/material/register', { method: 'POST', body: { ...form, turmaCodigo: selected.value.codigo } }, 'Material adicionado.')
+}
+async function deleteMaterial(id) {
+  await classAction(`/material/delete/${id}`, { method: 'DELETE' }, 'Material removido.')
+}
+async function addNotice(mensagem) {
+  await classAction(`/turma/${selected.value.codigo}/avisos`, { method: 'POST', body: { mensagem } }, 'Aviso publicado.')
+}
+async function deleteNotice(id) {
+  await classAction(`/turma/${selected.value.codigo}/avisos/${id}`, { method: 'DELETE' }, 'Aviso removido.')
+}
+async function updateClass(form) {
+  await classAction(`/turma/${selected.value.codigo}`, { method: 'PUT', body: { ...form, idEducator: session.value.id, price: 0 } }, 'Turma atualizada.')
+  await loadClasses()
+}
+async function scheduleDeletion() {
+  await classAction(`/turma/${selected.value.codigo}`, { method: 'DELETE' }, 'Exclusão agendada.')
+  await loadClasses()
+}
+async function cancelDeletion() {
+  await classAction(`/turma/${selected.value.codigo}/cancelar-exclusao`, { method: 'PATCH' }, 'Exclusão cancelada.')
+  await loadClasses()
+}
+async function updateStatus(status) {
+  await classAction(`/turma/${selected.value.codigo}/status`, { method: 'PATCH', body: { status } }, 'Status atualizado.')
+  await loadClasses()
+}
+async function joinByCode(code) {
+  if (!/^\d+$/.test(String(code).trim())) {
+    error.value = 'Informe um código numérico de turma.'
+    return
+  }
+  await joinClass({ codigo: Number(code), name: 'na turma' })
+}
+
 function backToClasses() {
   if (window.history.state?.from === 'dashboard') window.history.back()
   else navigate('dashboard', { replace: true })
@@ -146,7 +199,7 @@ async function joinClass(item) {
     await call(`/turma/${item.codigo}/entrar`, { method: 'POST', body: { idAluno: Number(session.value.id) } })
     window.history.replaceState({}, '', routeFor('dashboard'))
     view.value = 'dashboard'
-    notice.value = `Você entrou em ${item.name}.`
+    notice.value = item.name === 'na turma' ? 'Você entrou na turma.' : `Você entrou em ${item.name}.`
     await loadClasses()
   } catch (cause) { handleError(cause) }
   finally { loading.value = false }
@@ -173,9 +226,9 @@ onUnmounted(() => window.removeEventListener('popstate', onHistoryChange))
       <LandingView v-if="view === 'home'" @navigate="navigate" />
       <AuthView v-else-if="view === 'login' || view === 'register'" :mode="view" :loading="loading" :error="error" @submit="authenticate" @navigate="navigate" />
       <DashboardView v-else-if="view === 'dashboard'" :session="session" :classes="classes" :loading="loading" :error="error" :notice="notice" @navigate="navigate" @open-class="openClass" />
-      <CatalogView v-else-if="view === 'catalog'" :classes="classes" :catalog="catalog" :loading="loading" :error="error" @navigate="navigate" @join="joinClass" />
+      <CatalogView v-else-if="view === 'catalog'" :classes="classes" :catalog="catalog" :loading="loading" :error="error" @navigate="navigate" @join="joinClass" @join-code="joinByCode" />
       <ClassFormView v-else-if="view === 'create'" :loading="loading" :error="error" @navigate="navigate" @submit="createClass" />
-      <ClassDetailView v-else-if="view === 'class' && selected" :classroom="selected" :error="error" @navigate="backToClasses" />
+      <ClassDetailView v-else-if="view === 'class' && selected" :classroom="selected" :is-educator="session?.role?.toLowerCase() === 'educator'" :loading="classActionLoading" :error="error" :notice="notice" @navigate="backToClasses" @add-material="addMaterial" @delete-material="deleteMaterial" @add-notice="addNotice" @delete-notice="deleteNotice" @update-class="updateClass" @schedule-deletion="scheduleDeletion" @cancel-deletion="cancelDeletion" @update-status="updateStatus" />
     </main>
     <footer class="container footer"><span>Study Hub</span><span>Turmas, pessoas e materiais.</span></footer>
   </div>
