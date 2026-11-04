@@ -76,6 +76,22 @@
   --color-focus-ring: #ffd94d55;
 }
 
+/* Visible on keyboard focus, otherwise out of the reading flow. */
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: .75rem;
+  left: .75rem;
+  transform: translateY(-180%);
+  padding: .65rem 1rem;
+  border-radius: 7px;
+  background: var(--color-ink);
+  color: var(--color-on-ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+.skip-link:focus { transform: translateY(0); }
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
