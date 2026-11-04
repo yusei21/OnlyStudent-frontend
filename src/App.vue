@@ -172,8 +172,9 @@ onUnmounted(() => window.removeEventListener('popstate', onHistoryChange))
 
 <template>
   <div class="app-shell">
+    <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
     <AppHeader :session="session" :view="view" @navigate="navigate" @logout="logout" />
-    <main>
+    <main id="conteudo-principal" tabindex="-1">
       <LandingView v-if="view === 'home'" @navigate="navigate" />
       <AuthView v-else-if="view === 'login' || view === 'register'" :mode="view" :loading="loading" :error="error" @submit="authenticate" @navigate="navigate" />
       <DashboardView v-else-if="view === 'dashboard'" :session="session" :classes="classes" :loading="loading" :error="error" :notice="notice" @navigate="navigate" @open-class="openClass" />
