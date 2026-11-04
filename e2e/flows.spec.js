@@ -4,10 +4,10 @@ const password = process.env.DEMO_PASSWORD || 'OnlyStudent2026!'
 
 async function login(page, email) {
   await page.goto('/')
-  if (await page.getByRole('button', { name: 'Abrir menu' }).isVisible()) {
-    await page.getByRole('button', { name: 'Abrir menu' }).click()
+  if (await page.getByRole('button', { name: 'Alternar menu' }).isVisible()) {
+    await page.getByRole('button', { name: 'Alternar menu' }).click()
   }
-  await page.getByRole('navigation').getByRole('button', { name: 'Entrar' }).click()
+  await page.getByRole('navigation').getByRole('button', { name: /Entrar/ }).click()
   await page.getByLabel('E-mail').fill(email)
   await page.getByLabel('Senha').fill(password)
   await page.locator('form').getByRole('button', { name: 'Entrar' }).click()
@@ -29,9 +29,9 @@ test('aluno entra, vê as turmas, explora e abre os detalhes', async ({ page }) 
   await page.getByRole('button', { name: '← Minhas turmas' }).click()
   await expect(page.getByRole('heading', { name: 'Olá, Lucas.' })).toBeVisible()
   await noHorizontalOverflow(page)
-  const mobileMenu = page.getByRole('button', { name: 'Abrir menu' })
+  const mobileMenu = page.getByRole('button', { name: 'Alternar menu' })
   if (await mobileMenu.isVisible()) await mobileMenu.click()
-  await page.getByRole('navigation').getByRole('button', { name: 'Explorar turmas' }).click()
+  await page.getByRole('navigation').getByRole('button', { name: 'Explorar' }).click()
   await page.getByPlaceholder('Digite o nome da turma').fill('Lógica')
   await expect(page.getByText('Lógica de Programação')).toBeVisible()
   await noHorizontalOverflow(page)
