@@ -388,3 +388,163 @@ small { font-size: .875rem; }
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Classroom artwork is always contained inside its own card.
+   Avoid legacy generic card selectors influencing nested images. */
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 1.1rem;
+  width: 100%;
+  min-width: 0;
+}
+.class-grid > .classroom-card {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 12px;
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+}
+.class-grid > .classroom-card:hover {
+  transform: none;
+  border-color: var(--color-border-strong);
+}
+.class-artwork {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: 12rem;
+  flex: none;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--color-accent);
+}
+.class-artwork--compact { height: 8.5rem; }
+.class-artwork__cover {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-hover));
+}
+.class-artwork__cover-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.class-artwork__avatar {
+  position: absolute;
+  z-index: 1;
+  left: 1rem;
+  bottom: .75rem;
+  width: 3.25rem;
+  height: 3.25rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 11px;
+  border: 3px solid var(--color-surface);
+  box-shadow: 0 2px 8px #00000015;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+.class-artwork__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.classroom-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  min-width: 0;
+  padding: 1.15rem 1.25rem 1.25rem;
+  flex: 1;
+}
+.classroom-card__title {
+  display: block;
+  min-width: 0;
+  color: var(--color-text);
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.classroom-card__teacher {
+  display: block;
+  color: var(--color-muted);
+  font-size: .9rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.classroom-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .45rem;
+  width: 100%;
+  margin-top: auto;
+  padding-top: .9rem;
+  color: var(--color-muted);
+  border-top: 1px solid var(--color-border);
+  font-size: .83rem;
+  line-height: 1.5;
+}
+.classroom-card__meta > span {
+  padding: 0;
+  min-width: 0;
+}
+.class-detail .class-artwork {
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+.catalog-row .class-artwork {
+  width: 5rem;
+  min-width: 5rem;
+  max-width: 5rem;
+  height: 4.5rem;
+  border-radius: 8px;
+}
+.catalog-row .class-artwork__avatar {
+  width: 2rem;
+  height: 2rem;
+  left: .35rem;
+  bottom: .35rem;
+  font-size: .8rem;
+  border-width: 2px;
+  border-radius: 7px;
+}
+@media (max-width: 1050px) {
+  .class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .class-grid { grid-template-columns: minmax(0, 1fr); }
+  .class-artwork--compact { height: 9.25rem; }
+  .catalog-row .class-artwork { width: 4rem; min-width: 4rem; max-width: 4rem; height: 4rem; }
+}
