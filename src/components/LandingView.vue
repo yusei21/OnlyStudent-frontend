@@ -26,7 +26,7 @@ const features = [
         <div class="visual-orbit orbit-two" aria-hidden="true"></div>
         <div class="floating-tag tag-top"><span class="tag-symbol">✳</span> Seu semestre, organizado.</div>
         <div class="home-example">
-          <div class="example-head"><div class="example-brand"><span class="example-brand-mark">S.</span> Study Hub</div><span class="example-head-dots" aria-hidden="true">•••</span></div>
+          <div class="example-head"><div class="example-brand"><span class="example-brand-mark">✦</span> OnlyStudent</div><span class="example-head-dots" aria-hidden="true">•••</span></div>
           <div class="example-body">
             <div class="example-context"><span class="example-context-icon">▦</span><span>MINHA TURMA <span aria-hidden="true">/</span> VISÃO GERAL</span></div>
             <h2>Introdução à<br>Programação<span class="example-title-dot">.</span></h2>
