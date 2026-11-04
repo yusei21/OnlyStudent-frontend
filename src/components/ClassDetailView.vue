@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, watch } from 'vue'
 import { request } from '../lib/api.js'
+import ClassArtwork from './ClassArtwork.vue'
 const props=defineProps({classroom:{type:Object,required:true},session:{type:Object,default:null},error:{type:String,default:''}})
 const emit=defineEmits(['navigate','refresh','deleted'])
 const busy=ref(false),failure=ref(''),success=ref(''),tab=ref('materials'),editing=ref(false),addingMaterial=ref(false),editingMaterial=ref(null),editingAviso=ref(null)
@@ -29,7 +30,7 @@ async function loadStudents(){failure.value='';try{students.value=Array.from(awa
 <div class="workspace-heading"><div><span class="eyebrow">ESPAÇO DA TURMA</span><h1>{{classroom.name}}</h1><p>{{classroom.description}}</p></div><button class="text-button" @click="emit('navigate','dashboard')">← Minhas turmas</button></div>
 <p v-if="error||failure" class="message error" role="alert">{{error||failure}}</p><p v-if="success" class="message success" role="status">{{success}}</p>
 <div class="class-detail">
-<div v-if="classroom.coverImageUrl" class="class-cover" :style="{backgroundImage:'url('+classroom.coverImageUrl+')'}"></div>
+<ClassArtwork :name="classroom.name" :cover-url="classroom.coverImageUrl" :profile-url="classroom.profileImageUrl" />
 <div class="detail-info"><div><small>PROFESSOR</small><strong>{{classroom.educator||'—'}}</strong></div><div><small>ALUNOS</small><strong>{{classroom.nomeAlunos?.length||0}}</strong></div><div><small>MATERIAIS</small><strong>{{classroom.materiais?.length||0}}</strong></div></div>
 <div v-if="owner()" class="management-bar"><button class="button outline" @click="editing=!editing">Editar turma</button><label class="status-label">Status <select :value="classroom.status||'ATIVA'" :disabled="busy" @change="setStatus"><option value="ATIVA">Ativa</option><option value="BLOQUEADA">Bloqueada</option><option value="DESATIVADA">Desativada</option></select></label><button v-if="classroom.dataExclusaoAgendada" class="button outline" :disabled="busy" @click="cancelDeletion">Cancelar exclusão</button><button v-else class="text-button destructive" :disabled="busy" @click="scheduleDeletion">Agendar exclusão</button></div>
 <p v-if="classroom.dataExclusaoAgendada" class="message error">Exclusão agendada para {{new Date(classroom.dataExclusaoAgendada).toLocaleDateString('pt-BR')}}.</p>
