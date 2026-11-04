@@ -9,6 +9,9 @@ import DashboardView from './components/DashboardView.vue'
 import CatalogView from './components/CatalogView.vue'
 import ClassFormView from './components/ClassFormView.vue'
 import ClassDetailView from './components/ClassDetailView.vue'
+import ProfileView from './components/ProfileView.vue'
+import SupportView from './components/SupportView.vue'
+import AdminView from './components/AdminView.vue'
 
 function savedSession() {
   try { return JSON.parse(localStorage.getItem('onlystudent.session') || 'null') }
@@ -17,7 +20,7 @@ function savedSession() {
 
 const session = ref(savedSession())
 const initialRoute = routeFromHash(window.location.hash)
-const view = ref(session.value ? (initialRoute.view === 'home' ? 'dashboard' : initialRoute.view) : (['home', 'login', 'register'].includes(initialRoute.view) ? initialRoute.view : 'login'))
+const view = ref(session.value ? (initialRoute.view === 'home' ? 'dashboard' : initialRoute.view) : (['home', 'login', 'register', 'support'].includes(initialRoute.view) ? initialRoute.view : 'login'))
 const classes = ref([])
 const catalog = ref([])
 const selected = ref(null)
@@ -73,7 +76,8 @@ function navigate(next, { replace = false } = {}) {
   selected.value = null
   window.history[replace ? 'replaceState' : 'pushState']({}, '', routeFor(next))
   view.value = next
-  if (next === 'dashboard') loadClasses()
+  if (next === 'admin' && session.value?.role !== 'admin') { navigate('dashboard', { replace: true }); return }
+  if (next === 'dashboard' && session.value?.role !== 'admin') loadClasses()
   if (next === 'catalog') loadCatalog()
 }
 
@@ -86,7 +90,7 @@ async function authenticate(form) {
     localStorage.setItem('onlystudent.session', JSON.stringify(session.value))
     window.history.replaceState({}, '', routeFor('dashboard'))
     view.value = 'dashboard'
-    await loadClasses()
+    if (session.value.role !== 'admin') await loadClasses()
   } catch (cause) { handleError(cause) }
   finally { loading.value = false }
 }
@@ -112,7 +116,7 @@ function backToClasses() {
 
 function onHistoryChange() {
   const route = routeFromHash(window.location.hash)
-  if (!session.value && !['home', 'login', 'register'].includes(route.view)) {
+  if (!session.value && !['home', 'login', 'register', 'support'].includes(route.view)) {
     navigate('login', { replace: true })
     return
   }
@@ -121,7 +125,7 @@ function onHistoryChange() {
   if (route.view === 'class') showClass(route.classroomId, false)
   else {
     view.value = route.view
-    if (route.view === 'dashboard') loadClasses()
+    if (route.view === 'dashboard' && session.value?.role !== 'admin') loadClasses()
     if (route.view === 'catalog') loadCatalog()
   }
 }
@@ -158,8 +162,8 @@ onMounted(() => {
     if (initialRoute.view === 'home') window.history.replaceState({}, '', routeFor('dashboard'))
     if (initialRoute.view === 'class') showClass(initialRoute.classroomId, false)
     else if (view.value === 'catalog') loadCatalog()
-    else if (view.value === 'dashboard') loadClasses()
-  } else if (!['home', 'login', 'register'].includes(initialRoute.view)) {
+    else if (view.value === 'dashboard' && session.value?.role !== 'admin') loadClasses()
+  } else if (!['home', 'login', 'register', 'support'].includes(initialRoute.view)) {
     window.history.replaceState({}, '', routeFor('login'))
   }
 })
@@ -175,8 +179,11 @@ onUnmounted(() => window.removeEventListener('popstate', onHistoryChange))
       <DashboardView v-else-if="view === 'dashboard'" :session="session" :classes="classes" :loading="loading" :error="error" :notice="notice" @navigate="navigate" @open-class="openClass" />
       <CatalogView v-else-if="view === 'catalog'" :classes="classes" :catalog="catalog" :loading="loading" :error="error" @navigate="navigate" @join="joinClass" />
       <ClassFormView v-else-if="view === 'create'" :loading="loading" :error="error" @navigate="navigate" @submit="createClass" />
-      <ClassDetailView v-else-if="view === 'class' && selected" :classroom="selected" :error="error" @navigate="backToClasses" />
+      <ClassDetailView v-else-if="view === 'class' && selected" :classroom="selected" :session="session" :error="error" @navigate="backToClasses" @refresh="(id) => showClass(id, false)" />
+      <ProfileView v-else-if="view === 'profile' && session" :session="session" @navigate="navigate" />
+      <SupportView v-else-if="view === 'support'" :session="session" @navigate="navigate" />
+      <AdminView v-else-if="view === 'admin' && session?.role === 'admin'" :session="session" @navigate="navigate" />
     </main>
-    <footer class="container footer"><span>Study Hub</span><span>Turmas, pessoas e materiais.</span></footer>
+    <footer class="container footer"><span>OnlyStudent</span><span>Turmas, pessoas e materiais.</span></footer>
   </div>
 </template>
