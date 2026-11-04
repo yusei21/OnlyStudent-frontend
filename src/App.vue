@@ -76,7 +76,7 @@ function navigate(next, { replace = false } = {}) {
   selected.value = null
   window.history[replace ? 'replaceState' : 'pushState']({}, '', routeFor(next))
   view.value = next
-  if (next === 'admin' && session.value?.role !== 'admin') { navigate('dashboard', { replace: true }); return }
+  if (next === 'admin' && session.value?.role !== 'admin') return
   if (next === 'dashboard' && session.value?.role !== 'admin') loadClasses()
   if (next === 'catalog') loadCatalog()
 }
@@ -88,8 +88,8 @@ async function authenticate(form) {
     if (view.value === 'register') await request('/auth/register', { method: 'POST', body: form })
     session.value = await request('/auth/login', { method: 'POST', body: { email: form.email, password: form.password } })
     localStorage.setItem('onlystudent.session', JSON.stringify(session.value))
-    window.history.replaceState({}, '', routeFor('dashboard'))
-    view.value = 'dashboard'
+    window.history.replaceState({}, '', routeFor(session.value.role === 'admin' ? 'admin' : 'dashboard'))
+    view.value = session.value.role === 'admin' ? 'admin' : 'dashboard'
     if (session.value.role !== 'admin') await loadClasses()
   } catch (cause) { handleError(cause) }
   finally { loading.value = false }
